@@ -1,0 +1,22 @@
+{
+  "name": "valorant-rpc",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start:dev": "nodemon src/index.js",
+    "start:prod": "node src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@tqman/valorant-api-client": "^1.4.0",
+    "discord-rpc": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/discord-rpc": "^4.0.8",
+    "nodemon": "^3.1.4"
+  }
+}
