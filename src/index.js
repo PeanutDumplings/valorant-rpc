@@ -4,9 +4,12 @@ const client = new Client({ transport: "ipc" });
 
 client.on("ready", () => {
   client.setActivity({
-    details: "Basic RPC implementation",
-    largeImageKey: "test",
-    largeImageText: "Example valorant image",
+    details: "Unrated \\ 1-4",
+    largeImageKey: "splash_sunset_square",
+    largeImageText: "Sunset",
+    smallImageKey: "agent_cypher",
+    smallImageText: "Cypher",
+    state: "In a party (1 of 5)",
     startTimestamp: new Date(),
   });
 });
