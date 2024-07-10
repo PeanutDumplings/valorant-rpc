@@ -41,14 +41,12 @@ import fetchData from "./utils/fetchData.js";
 
   const puuid = vapic.remote.puuid;
 
-  // vapic.remote.getPreGameMatch({})
-
   setInterval(async () => {
     try {
       const result = await fetchData(vapic, puuid);
       console.log(result);
     } catch (error) {
-      console.error(error);
+      console.error("error");
     }
-  }, 1500);
+  }, 15000);
 })();

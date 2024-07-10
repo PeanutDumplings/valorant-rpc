@@ -1,45 +1,47 @@
 const fetchData = async (vapic, puuid) => {
-  //   const playerData = await vapic.remote.getCurrentGamePlayer({
-  //     data: { puuid },
-  //   });
+  try {
+    const playerData = await vapic.remote.getCurrentGamePlayer({
+      data: { puuid },
+    });
 
-  //   console.log(playerData);
-
-  //   if (playerData) {
-  //     console.log(playerData.data.MatchID);
-
-  //     const matchData = await vapic.remote.getCurrentGameMatch({
-  //       data: {
-  //         currentGameMatchId: playerData.data.MatchID,
-  //       },
-  //     });
-
-  //     if (!matchData.data.MatchmakingData) {
-  //       return "Gamemode: Shooting Range";
-  //     } else {
-  //       return `Gamemode: ${matchData.data.MatchmakingData.QueueID}`;
-  //     }
-  //   } else {
-  const preGamePlayerData = await vapic.remote.getPreGamePlayer({
-    data: { puuid },
-  });
-
-  console.log(preGamePlayerData);
-
-  if (!preGamePlayerData) {
-    return "In lobby";
-  } else {
-    const preGameMatchData = await vapic.remote.getPreGameMatch({
+    const matchData = await vapic.remote.getCurrentGameMatch({
       data: {
-        preGameMatchId: preGamePlayerData.data.MatchID,
+        currentGameMatchId: playerData.data.MatchID,
       },
     });
 
-    console.log(preGameMatchData);
+    if (matchData.data.MatchmakingData) {
+      return {
+        gamemode: matchData.data.MatchmakingData.QueueID,
+        isRanked: matchData.data.MatchmakingData.IsRanked,
+        map: matchData.data.MapID,
+      };
+    } else {
+      return {
+        gamemode: "The Range",
+        map: "The Range",
+        isRanked: false,
+      };
+    }
+  } catch (error) {
+    try {
+      const preGamePlayerData = await vapic.remote.getPreGamePlayer({
+        data: { puuid },
+      });
 
-    return "In queue";
+      const preGameMatchData = await vapic.remote.getPreGameMatch({
+        data: {
+          preGameMatchId: preGamePlayerData.data.MatchID,
+        },
+      });
+      return {
+        gamemode: preGameMatchData.data.QueueID,
+        map: preGameMatchData.data.MapID,
+      };
+    } catch (error) {
+      return "In lobby";
+    }
   }
-  //   }
 };
 
 export default fetchData;
