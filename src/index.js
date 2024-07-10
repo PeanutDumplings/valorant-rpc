@@ -1,20 +1,26 @@
-import { Client } from "discord-rpc";
+// import { Client } from "discord-rpc";
 
-const client = new Client({ transport: "ipc" });
+// const client = new Client({ transport: "ipc" });
+// import { Agents, StandardMaps } from "./utils/constants.js";
 
-client.on("ready", () => {
-  client.setActivity({
-    details: "Unrated \\ 1-4",
-    largeImageKey: "splash_sunset_square",
-    largeImageText: "Sunset",
-    smallImageKey: "agent_cypher",
-    smallImageText: "Cypher",
-    state: "In a party (1 of 5)",
-    startTimestamp: new Date(),
-  });
-});
+// client.on("ready", () => {
+//   client.setActivity({
+//     details: "Unrated \\\\ 1-4",
+//     largeImageKey: StandardMaps.Abyss,
+//     largeImageText: `Playing on ${Object.keys(StandardMaps).find((key) => StandardMaps[key] === StandardMaps.Abyss)}`,
+//     smallImageKey: Agents.Brimstone,
+//     smallImageText: `Playing as ${Object.keys(Agents).find((key) => Agents[key] === Agents.Brimstone)}`,
+//     state: "In a party",
+//     partySize: 1,
+//     partyMax: 5,
 
-client.login({ clientId: "1260470012536291418" });
+//     startTimestamp: new Date(),
+//   });
+// });
+
+// client.login({ clientId: "1260470012536291418" });
+
+console.clear()
 
 import {
     createValorantApiClient,
@@ -25,16 +31,12 @@ import {
     useProviders,
   } from "@tqman/valorant-api-client";
   
-  // Create Valorant API Client
   const vapic = await createValorantApiClient({
     auth: useProviders(provideClientVersionViaVAPI()),
     local: useProviders(provideLockFile()),
     remote: useProviders([provideLogFile(), provideAuthViaLocalApi()]),
   });
-  
 
-const friends = await vapic.local.getFriends();
-// console.log(friends.data.friends.map((friend) => friend.game_name))
-const data = await vapic.local.getPresence()
-// console.log(data.data.presences)
-// console.log(typeof friends)
+await vapic.local.getFriends()
+
+vapic.remote.getCurrentGameMatch

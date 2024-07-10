@@ -1,0 +1,40 @@
+export const Agents = Object.freeze({
+    Astra: "agent_astra",
+    Breach: "agent_breach",
+    Brimstone: "agent_brimstone",
+    Chamber: "agent_chamber",
+    Clove: "agent_clove",
+    Cypher: "agent_cypher",
+    Deadlock: "agent_deadlock",
+    Fade: "agent_fade",
+    Gekko: "agent_gekko",
+    Habor: "agent_habor",
+    Iso: "agent_iso",
+    Jett: "agent_jett",
+    Kayo: "agent_kayo",
+    Killjoy: "agent_killjoy",
+    Neon: "agent_neon",
+    Omen: "agent_omen",
+    Phoenix: "agent_phoenix",
+    Raze: "agent_raze",
+    Reyna: "agent_reyna",
+    Sage: "agent_sage",
+    Skye: "agent_skye",
+    Sova: "agent_sova",
+    Viper: "agent_viper",
+    Yoru: "agent_yoru"
+});
+
+export const StandardMaps = Object.freeze({
+    Abyss: "splash_abyss_square",
+    Ascent: "splash_ascent_square",
+    Bind: "splash_bind_square",
+    Breeze: "splash_breeze_square",
+    Fracture: "splash_fracture_square",
+    Haven: "splash_haven_square",
+    Icebox: "splash_icebox_square",
+    Lotus: "splash_lotus_square",
+    Pearl: "splash_pearl_square",
+    Split: "splash_split_square",
+    Sunset: "splash_sunset_square"
+});
