@@ -9,18 +9,48 @@ const fetchData = async (vapic, puuid) => {
         currentGameMatchId: playerData.data.MatchID,
       },
     });
+    const score = await vapic.local.getPresence({
+      data: { puuid },
+    });
+    score.data.presences.forEach((presence) => {
+      if (presence.game_name === "PeanutDumplings") {
+        const json = JSON.parse(atob(presence.private));
+        console.log(
+          json.partyOwnerMatchScoreAllyTeam,
+          json.partyOwnerMatchScoreEnemyTeam
+        );
+      }
+    });
+
+    const self = matchData.data.Players.find(
+      (player) => player.Subject === puuid
+    );
+
+    console.log(matchData.data.MatchmakingData);
 
     if (matchData.data.MatchmakingData) {
       return {
         gamemode: matchData.data.MatchmakingData.QueueID,
         isRanked: matchData.data.MatchmakingData.IsRanked,
         map: matchData.data.MapID,
+        self: {
+          puuid: self.Subject,
+          agentID: self.CharacterID,
+        },
+        score: {
+          ally: json.partyOwnerMatchScoreAllyTeam,
+          enemy: json.partyOwnerMatchScoreEnemyTeam,
+        },
       };
     } else {
       return {
-        gamemode: "The Range",
-        map: "The Range",
+        gamemode: "Practice",
+        map: "/Game/Maps/Poveglia/Range",
         isRanked: false,
+        score: {
+          ally: null,
+          enemy: null,
+        },
       };
     }
   } catch (error) {
@@ -34,12 +64,34 @@ const fetchData = async (vapic, puuid) => {
           preGameMatchId: preGamePlayerData.data.MatchID,
         },
       });
+
+      console.log(preGameMatchData.data.AllyTeam.Players);
+
+      const self = preGameMatchData.data.AllyTeam.Players.find(
+        (player) => player.Subject === puuid
+      );
+
+      console.log(self);
+
       return {
         gamemode: preGameMatchData.data.QueueID,
         map: preGameMatchData.data.MapID,
+        isRanked: preGameMatchData.data.IsRanked,
+        score: {
+          ally: null,
+          enemy: null,
+        },
       };
     } catch (error) {
-      return "In lobby";
+      return {
+        gamemode: null,
+        map: null,
+        isRanked: null,
+        score: {
+          ally: null,
+          enemy: null,
+        },
+      };
     }
   }
 };
