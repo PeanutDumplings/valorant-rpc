@@ -20,23 +20,35 @@
 
 // client.login({ clientId: "1260470012536291418" });
 
-console.clear()
+console.clear();
 
 import {
-    createValorantApiClient,
-    provideAuthViaLocalApi,
-    provideClientVersionViaVAPI,
-    provideLockFile,
-    provideLogFile,
-    useProviders,
-  } from "@tqman/valorant-api-client";
-  
+  createValorantApiClient,
+  provideAuthViaLocalApi,
+  provideClientVersionViaVAPI,
+  provideLockFile,
+  provideLogFile,
+  useProviders,
+} from "@tqman/valorant-api-client";
+import fetchData from "./utils/fetchData.js";
+
+(async () => {
   const vapic = await createValorantApiClient({
     auth: useProviders(provideClientVersionViaVAPI()),
     local: useProviders(provideLockFile()),
     remote: useProviders([provideLogFile(), provideAuthViaLocalApi()]),
   });
 
-await vapic.local.getFriends()
+  const puuid = vapic.remote.puuid;
 
-vapic.remote.getCurrentGameMatch
+  // vapic.remote.getPreGameMatch({})
+
+  setInterval(async () => {
+    try {
+      const result = await fetchData(vapic, puuid);
+      console.log(result);
+    } catch (error) {
+      console.error(error);
+    }
+  }, 1500);
+})();
