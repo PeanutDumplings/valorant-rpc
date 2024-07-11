@@ -45,6 +45,10 @@ const fetchData = async (vapic, puuid) => {
             puuid: player.Subject,
             agentID: player.CharacterID,
           },
+          party: {
+            partySize: json.partySize,
+            maxPartySize: json.maxPartySize,
+          },
           score: {
             ally: json.partyOwnerMatchScoreAllyTeam,
             enemy: json.partyOwnerMatchScoreEnemyTeam,
@@ -61,6 +65,10 @@ const fetchData = async (vapic, puuid) => {
           player: {
             puuid: player.Subject,
             agentID: player.CharacterID,
+          },
+          party: {
+            partySize: json.partySize,
+            maxPartySize: json.maxPartySize,
           },
           score: {
             ally: null,
@@ -82,13 +90,20 @@ const fetchData = async (vapic, puuid) => {
         },
       });
 
+      const presence = await vapic.local.getPresence({
+        data: { puuid },
+      });
+
+      let json = {};
+      presence.data.presences.forEach((presence) => {
+        if (presence.puuid === puuid) {
+          json = JSON.parse(atob(presence.private));
+        }
+      });
+
       const player = preGameMatchData.data.AllyTeam.Players.find(
         (player) => player.Subject === puuid
       );
-
-      console.log(preGameMatchData.data);
-
-      console.log(player);
 
       return {
         data: {
@@ -100,6 +115,10 @@ const fetchData = async (vapic, puuid) => {
             puuid: player.Subject,
             agentID: player.CharacterID,
           },
+          party: {
+            partySize: json.partySize,
+            maxPartySize: json.maxPartySize,
+          },
           score: {
             ally: null,
             enemy: null,
@@ -107,7 +126,33 @@ const fetchData = async (vapic, puuid) => {
         },
       };
     } catch (error) {
-      return { data: null };
+      const presence = await vapic.local.getPresence({
+        data: { puuid },
+      });
+
+      let json = {};
+      presence.data.presences.forEach((presence) => {
+        if (presence.puuid === puuid) {
+          json = JSON.parse(atob(presence.private));
+        }
+      });
+      return {
+        data: {
+          pregame: null,
+          gamemode: null,
+          map: null,
+          isRanked: null,
+          player: {
+            puuid: puuid,
+            agentID: null,
+          },
+          party: {
+            partySize: json.partySize,
+            maxPartySize: json.maxPartySize,
+          },
+          score: { ally: null, enemy: null },
+        },
+      };
     }
   }
 };
