@@ -1,5 +1,6 @@
 const fetchData = async (vapic, puuid) => {
   try {
+    // Get data from current game
     const playerData = await vapic.remote.getCurrentGamePlayer({
       data: { puuid },
     });
@@ -9,52 +10,68 @@ const fetchData = async (vapic, puuid) => {
         currentGameMatchId: playerData.data.MatchID,
       },
     });
-    const score = await vapic.local.getPresence({
+
+    // Initialize score object
+    let score = { data: { presences: [] } };
+
+    // Fetch presence data
+    score = await vapic.local.getPresence({
       data: { puuid },
     });
+
+    // Find the correct presence and parse JSON
+    let json = {
+      partyOwnerMatchScoreAllyTeam: null,
+      partyOwnerMatchScoreEnemyTeam: null,
+    };
     score.data.presences.forEach((presence) => {
-      if (presence.game_name === "PeanutDumplings") {
-        const json = JSON.parse(atob(presence.private));
-        console.log(
-          json.partyOwnerMatchScoreAllyTeam,
-          json.partyOwnerMatchScoreEnemyTeam
-        );
+      if (presence.puuid === puuid) {
+        json = JSON.parse(atob(presence.private));
       }
     });
 
-    const self = matchData.data.Players.find(
+    const player = matchData.data.Players.find(
       (player) => player.Subject === puuid
     );
 
-    console.log(matchData.data.MatchmakingData);
-
     if (matchData.data.MatchmakingData) {
       return {
-        gamemode: matchData.data.MatchmakingData.QueueID,
-        isRanked: matchData.data.MatchmakingData.IsRanked,
-        map: matchData.data.MapID,
-        self: {
-          puuid: self.Subject,
-          agentID: self.CharacterID,
-        },
-        score: {
-          ally: json.partyOwnerMatchScoreAllyTeam,
-          enemy: json.partyOwnerMatchScoreEnemyTeam,
+        data: {
+          pregame: false,
+          gamemode: matchData.data.MatchmakingData.QueueID,
+          isRanked: matchData.data.MatchmakingData.IsRanked,
+          map: matchData.data.MapID,
+          player: {
+            puuid: player.Subject,
+            agentID: player.CharacterID,
+          },
+          score: {
+            ally: json.partyOwnerMatchScoreAllyTeam,
+            enemy: json.partyOwnerMatchScoreEnemyTeam,
+          },
         },
       };
     } else {
       return {
-        gamemode: "Practice",
-        map: "/Game/Maps/Poveglia/Range",
-        isRanked: false,
-        score: {
-          ally: null,
-          enemy: null,
+        data: {
+          pregame: false,
+          gamemode: "Practice",
+          map: "/Game/Maps/Poveglia/Range",
+          isRanked: false,
+          player: {
+            puuid: player.Subject,
+            agentID: player.CharacterID,
+          },
+          score: {
+            ally: null,
+            enemy: null,
+          },
         },
       };
     }
   } catch (error) {
     try {
+      // If fails, get data from pregame
       const preGamePlayerData = await vapic.remote.getPreGamePlayer({
         data: { puuid },
       });
@@ -65,33 +82,32 @@ const fetchData = async (vapic, puuid) => {
         },
       });
 
-      console.log(preGameMatchData.data.AllyTeam.Players);
-
-      const self = preGameMatchData.data.AllyTeam.Players.find(
+      const player = preGameMatchData.data.AllyTeam.Players.find(
         (player) => player.Subject === puuid
       );
 
-      console.log(self);
+      console.log(preGameMatchData.data);
+
+      console.log(player);
 
       return {
-        gamemode: preGameMatchData.data.QueueID,
-        map: preGameMatchData.data.MapID,
-        isRanked: preGameMatchData.data.IsRanked,
-        score: {
-          ally: null,
-          enemy: null,
+        data: {
+          pregame: true,
+          gamemode: preGameMatchData.data.QueueID,
+          map: preGameMatchData.data.MapID,
+          isRanked: preGameMatchData.data.IsRanked,
+          player: {
+            puuid: player.Subject,
+            agentID: player.CharacterID,
+          },
+          score: {
+            ally: null,
+            enemy: null,
+          },
         },
       };
     } catch (error) {
-      return {
-        gamemode: null,
-        map: null,
-        isRanked: null,
-        score: {
-          ally: null,
-          enemy: null,
-        },
-      };
+      return { data: null };
     }
   }
 };
