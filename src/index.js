@@ -19,6 +19,9 @@ const vapic = await createValorantApiClient({
   auth: useProviders(provideClientVersionViaVAPI()),
   local: useProviders(provideLockFile()),
   remote: useProviders([provideLogFile(), provideAuthViaLocalApi()]),
+}).catch(() => {
+  console.error("VALORANT must be open");
+  process.exit(1);
 });
 
 client.on("ready", () => {
