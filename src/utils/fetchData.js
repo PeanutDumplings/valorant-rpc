@@ -46,6 +46,8 @@ const fetchData = async (vapic, puuid) => {
             agentID: player.CharacterID,
           },
           party: {
+            partyState: json.partyState,
+            queueId: json.queueId,
             partySize: json.partySize,
             maxPartySize: json.maxPartySize,
           },
@@ -67,6 +69,8 @@ const fetchData = async (vapic, puuid) => {
             agentID: player.CharacterID,
           },
           party: {
+            partyState: json.partyState,
+            queueId: json.queueId,
             partySize: json.partySize,
             maxPartySize: json.maxPartySize,
           },
@@ -116,6 +120,8 @@ const fetchData = async (vapic, puuid) => {
             agentID: player.CharacterID,
           },
           party: {
+            partyState: json.partyState,
+            queueId: json.queueId,
             partySize: json.partySize,
             maxPartySize: json.maxPartySize,
           },
@@ -147,6 +153,8 @@ const fetchData = async (vapic, puuid) => {
             agentID: null,
           },
           party: {
+            partyState: json.partyState,
+            queueId: json.queueId,
             partySize: json.partySize,
             maxPartySize: json.maxPartySize,
           },

@@ -48,3 +48,7 @@ export const Maps = Object.freeze({
 export const PracticeMaps = Object.freeze({
   "/Game/Maps/Poveglia/Range": "splash_range_square",
 });
+
+export const StateTypes = Object.freeze({
+  Lobby: "In the Lobby",
+});

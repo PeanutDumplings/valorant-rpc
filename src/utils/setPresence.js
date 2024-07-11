@@ -1,88 +1,101 @@
-import { client } from "..";
-import { Agents, PracticeMaps } from "./constants";
+import { client } from "../index.js";
+import { Agents, Maps, PracticeMaps } from "./constants.js";
+
+const PresenceState = Object.freeze({
+  IN_LOBBY: "In lobby",
+  QUEUEING: (queueId) => `${capitalizeFirstLetter(queueId)} \\\\ Queueing`,
+  IN_RANGE: "In the Range",
+  AGENT_SELECT: (gamemode) =>
+    `${capitalizeFirstLetter(gamemode)} \\\\ Agent Select`,
+  IN_GAME: (gamemode, allyScore, enemyScore) =>
+    `${capitalizeFirstLetter(gamemode)} \\\\ ${allyScore} - ${enemyScore}`,
+  UNKNOWN: "Unknown",
+});
+
+let previousState = null;
+let previousTimestamp = null;
 
 const setPresence = (data) => {
-  /**
-   * {
-   *    gamemode: string | null;
-   *    map: string | null;
-   *    isRanked: boolean | null;
-   *    score: {
-   *    ally: number | null;
-   *    enemy: number | null;
-   * }
-   *
-   */
+  let newState = null;
 
-  // In lobby
-  if (!data.data.gamemode) {
-    client.setActivity({
-      details: "In the lobby",
-      largeImageKey: "game_icon",
-      largeImageText: `In the lobby`,
-      state: "In a party",
-      partySize: data.data.party.partySize,
-      partyMax: data.data.party.maxPartySize,
-      startTimestamp: new Date(),
-    });
+  if (!data.data.gamemode && data.data.party.partyState === "DEFAULT") {
+    newState = PresenceState.IN_LOBBY;
+  } else if (data.data.party.partyState === "MATCHMAKING") {
+    newState = PresenceState.QUEUEING(data.data.party.queueId);
+  } else if (data.data.gamemode === "Practice") {
+    newState = PresenceState.IN_RANGE;
+  } else if (data.data.pregame) {
+    newState = PresenceState.AGENT_SELECT(data.data.gamemode);
+  } else if (!data.data.pregame) {
+    newState = PresenceState.IN_GAME(
+      data.data.gamemode,
+      data.data.score.ally,
+      data.data.score.enemy
+    );
+  } else {
+    newState = PresenceState.UNKNOWN;
   }
 
-  // In the range
-  if (data.data.gamemode === "Practice") {
-    client.setActivity({
-      details: "In the Range",
-      largeImageKey: PracticeMaps[data.data.map],
-      largeImageText: "In the Range",
-      smallImageKey: Agents[data.data.player.agentID] || "",
-      smallImageText: getSmallImageText(data.data.player.agentID) || "",
-      state: "In a party",
-      partySize: data.data.party.partySize,
-      partyMax: data.data.party.maxPartySize,
-      startTimestamp: new Date(),
-    });
+  if (newState !== previousState) {
+    previousState = newState;
+    previousTimestamp = new Date();
   }
 
-  // In agent select
-  if (data.data.pregame) {
-    client.setActivity({
-      details: `${capitalizeFirstLetter(data.data.gamemode)} \\\\ Agent Select`,
-      largeImageKey: Maps[data.data.map],
-      largeImageText: getLargeImageText(data.data.map),
-      smallImageKey: Agents[data.data.player.agentID] || "",
-      smallImageText: getSmallImageText(data.data.player.agentID) || "",
-      state: "In a party",
-      partySize: data.data.party.partySize,
-      partyMax: data.data.party.maxPartySize,
-      startTimestamp: new Date(),
-    });
+  let rpcData = {
+    largeImageKey: "game_icon",
+    state: "In a party",
+    partySize: data.data.party.partySize,
+    partyMax: data.data.party.maxPartySize,
+    startTimestamp: previousTimestamp,
+  };
+
+  switch (newState) {
+    case PresenceState.IN_LOBBY:
+      rpcData.details = "In the lobby";
+      rpcData.largeImageText = "In the lobby";
+      break;
+    case PresenceState.QUEUEING(data.data.party.queueId):
+      rpcData.details = newState;
+      rpcData.largeImageText = newState.split(" \\\\ ")[0];
+      break;
+    case PresenceState.IN_RANGE:
+      rpcData.details = "In the Range";
+      rpcData.largeImageText = "In the Range";
+      rpcData.largeImageKey = PracticeMaps[data.data.map];
+      rpcData.smallImageKey = Agents[data.data.player.agentID] || "";
+      rpcData.smallImageText =
+        getSmallImageText(data.data.player.agentID) || "";
+      break;
+    case PresenceState.AGENT_SELECT(data.data.gamemode):
+      rpcData.details = newState;
+      rpcData.largeImageKey = Maps[data.data.map];
+      rpcData.largeImageText = getLargeImageText(data.data.map);
+      rpcData.smallImageKey = Agents[data.data.player.agentID] || "";
+      rpcData.smallImageText =
+        getSmallImageText(data.data.player.agentID) || "";
+      break;
+    case PresenceState.IN_GAME(
+      data.data.gamemode,
+      data.data.score.ally,
+      data.data.score.enemy
+    ):
+      rpcData.details = newState;
+      rpcData.largeImageKey = Maps[data.data.map] || "";
+      rpcData.largeImageText = getLargeImageText(data.data.map) || "";
+      rpcData.smallImageKey = Agents[data.data.player.agentID] || "";
+      rpcData.smallImageText =
+        getSmallImageText(data.data.player.agentID) || "";
+      break;
+    case PresenceState.UNKNOWN:
+      rpcData.largeImageText = `Valorant`;
+      break;
+    default:
+      rpcData.largeImageText = `Valorant`;
+      break;
   }
 
-  // In a game
-  if (!data.data.pregame) {
-    client.setActivity({
-      details: "",
-      largeImageKey: "",
-      largeImageText: "",
-      smallImageKey: "",
-      smallImageText: "",
-      state: "",
-      partySize: 0,
-      partyMax: 5,
-      startTimestamp: new Date(),
-    });
-  }
-
-  // client.setActivity({
-  //   details: "",
-  //   largeImageKey: "",
-  //   largeImageText: "",
-  //   smallImageKey: "",
-  //   smallImageText: "",
-  //   state: "",
-  //   partySize: 0,
-  //   partyMax: 5,
-  //   startTimestamp: new Date(),
-  // });
+  // Set the Discord RPC activity
+  return client.setActivity(rpcData);
 };
 
 const getLargeImageText = (mapID) => {
@@ -92,6 +105,9 @@ const getLargeImageText = (mapID) => {
 };
 
 const getSmallImageText = (agentID) => {
+  if (!Agents[agentID]) {
+    return "";
+  }
   const agentLowerCase = Agents[agentID].split("_")[1];
   const agentUpperCase = capitalizeFirstLetter(agentLowerCase);
   return `Playing as ${agentUpperCase}`;
@@ -100,3 +116,5 @@ const getSmallImageText = (agentID) => {
 const capitalizeFirstLetter = (string) => {
   return string.slice(0, 1).toUpperCase() + string.slice(1);
 };
+
+export default setPresence;
