@@ -18,7 +18,7 @@ _This was heavily inspired by [this project](https://github.com/colinhartigan/va
 1. Clone this repo
 
 ```sh
-git clone "https://github.com/colinhartigan/valorant-rpc.git"
+git clone https://github.com/peanutdumplings/valorant-rpc.git
 ```
 
 2. CD to the directory
