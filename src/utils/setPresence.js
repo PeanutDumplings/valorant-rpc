@@ -3,13 +3,24 @@ import { Agents, Maps, PracticeMaps } from "./constants.js";
 
 const PresenceState = Object.freeze({
   IN_LOBBY: "In lobby",
-  QUEUEING: (queueId) => `${capitalizeFirstLetter(queueId)} \\\\ Queueing`,
+  QUEUEING: (queueId) => `${QueueIdMapping[queueId]} \\\\ Queueing`,
   IN_RANGE: "In the Range",
   AGENT_SELECT: (gamemode) =>
     `${capitalizeFirstLetter(gamemode)} \\\\ Agent Select`,
   IN_GAME: (gamemode, allyScore, enemyScore) =>
     `${capitalizeFirstLetter(gamemode)} \\\\ ${allyScore} - ${enemyScore}`,
+  CUSTOM_GAME: "Custom Game",
   UNKNOWN: "Unknown",
+});
+
+const QueueIdMapping = Object.freeze({
+  unrated: "Unrated",
+  competitive: "Competitive",
+  swiftplay: "Swiftplay",
+  spikerush: "Spike Rush",
+  deathmatch: "Deathmatch",
+  ggteam: "Escalation",
+  hurm: "Team Deathmatch",
 });
 
 let previousState = null;
@@ -18,7 +29,9 @@ let previousTimestamp = null;
 const setPresence = (data) => {
   let newState = null;
 
-  if (!data.data.gamemode && data.data.party.partyState === "DEFAULT") {
+  if (data.data.party.partyState === "CUSTOM_GAME_SETUP") {
+    newState = PresenceState.CUSTOM_GAME;
+  } else if (!data.data.gamemode && data.data.party.partyState === "DEFAULT") {
     newState = PresenceState.IN_LOBBY;
   } else if (data.data.party.partyState === "MATCHMAKING") {
     newState = PresenceState.QUEUEING(data.data.party.queueId);
@@ -86,6 +99,15 @@ const setPresence = (data) => {
       rpcData.smallImageText =
         getSmallImageText(data.data.player.agentID) || "";
       break;
+    case PresenceState.CUSTOM_GAME:
+      rpcData.details = newState;
+      rpcData.largeImageKey = "game_icon";
+      rpcData.largeImageText = "Playing in a Custom Game";
+      rpcData.smallImageKey = Agents[data.data.player.agentID] || "";
+      rpcData.smallImageText =
+        getSmallImageText(data.data.player.agentID) || "";
+      break;
+
     case PresenceState.UNKNOWN:
       rpcData.largeImageText = `Valorant`;
       break;
@@ -94,7 +116,6 @@ const setPresence = (data) => {
       break;
   }
 
-  // Set the Discord RPC activity
   return client.setActivity(rpcData);
 };
 
